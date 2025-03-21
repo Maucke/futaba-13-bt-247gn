@@ -8,7 +8,7 @@ unsigned char gram[8 + 3] = {0};
 void test()
 {
     unsigned char i = 0;
-    unsigned short *grid = (unsigned short *)(gram + 6);
+    unsigned short *grid = (unsigned short *)(gram + 8);
     for (i = 0; i < 11; i++)
     {
         gram[i] = 0xff;
@@ -20,6 +20,8 @@ void test()
 
         hv57708_dataout(gram + 8);
         hv5812_dataout(gram);
+				hv5812_updata();
+				hv57708_updata();
         HAL_Delay(100);
     }
 }

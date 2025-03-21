@@ -2,5 +2,6 @@
 #define __HV5812_H__
 
 void hv5812_dataout(unsigned char *data);
+void hv5812_updata(void);
 
 #endif

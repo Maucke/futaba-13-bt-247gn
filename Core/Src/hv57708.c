@@ -40,10 +40,13 @@ void hv57708_dataout(unsigned char *data)
 		}
 		data++;
 	}
+}
+
+void hv57708_updata()
+{
 	HAL_GPIO_WritePin(HV_LE_GPIO_Port, HV_LE_Pin, GPIO_PIN_RESET);
 	delay();
 	HAL_GPIO_WritePin(HV_LE_GPIO_Port, HV_LE_Pin, GPIO_PIN_SET);
 	delay();
 	HAL_GPIO_WritePin(HV_LE_GPIO_Port, HV_LE_Pin, GPIO_PIN_RESET);
-	HAL_Delay(2);
 }
