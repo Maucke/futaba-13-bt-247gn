@@ -5,7 +5,7 @@
 
 Futaba247Gn device;
 
-uint8_t Gram[13][9] = {0};
+uint8_t internalGram[13][9] = {0};
 
 static void delay()
 {
@@ -20,7 +20,7 @@ void init_screen()
     {
         for (int j = 0; j < 9; j++)
         {
-            Gram[i][j] = 0x55;
+            internalGram[i][j] = 0x55;
         }
     }
 }
@@ -30,8 +30,8 @@ void scan_screen()
     for (size_t j = 0; j < 13; j++)
     {
         for (size_t i = 0; i < 8; i++)
-            device.segment_part1[i] = Gram[j][i];
-        device.segment_part2 = Gram[j][8];
+            device.segment_part1[i] = internalGram[j][i];
+        device.segment_part2 = internalGram[j][8];
         device.grid_part = 1<<j;
         device.reverse = 0x0;
         hv57708_dataout(device.rawbytes);

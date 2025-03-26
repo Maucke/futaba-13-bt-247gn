@@ -3,6 +3,8 @@
 
 #include "stm32f4xx_hal.h"
 
+extern uint8_t internalGram[][9];
+
 typedef union
 {
     struct
