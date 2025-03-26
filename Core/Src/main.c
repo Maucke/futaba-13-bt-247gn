@@ -93,7 +93,7 @@ int main(void)
   MX_SPI1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
+//  HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
   //  init_screen();
   /* USER CODE END 2 */
 
@@ -104,10 +104,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    //		test();
+    // test();
     scan_screen();
 
-    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
   }
   /* USER CODE END 3 */
 }
@@ -161,16 +160,20 @@ void SystemClock_Config(void)
 
 void HAL_SPI_RxIntCpltCallback(SPI_HandleTypeDef *hspi, int count)
 {
-  uint8_t i;
+  uint8_t i,j;
   uint8_t *pGram = (uint8_t *)&internalGram;
   if (hspi->Instance == SPI1)
   {
-		if(rx_buffer[0] == 0xFF)
-			NVIC_SystemReset();
+//		if(rx_buffer[0] == 0xFF)
+//			NVIC_SystemReset();
+//		printf("%02X ", rx_buffer[0]);
     for (i = 0; i < count && (rx_buffer[0] * 9 + i) < (9 * 13); i++)
     {
       pGram[rx_buffer[0] * 9 + i] = rx_buffer[i + 1];
+//			printf("%02X ", rx_buffer[i + 1]);
     }
+//		printf("count: %d\n", count);
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 //    for (i = 0; i < 13; i++)
 //		{
 //			for (j = 0; j < 9; j++)
@@ -186,8 +189,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   uint16_t remaining_count = hdma_spi1_rx.Instance->NDTR;
   uint16_t current_count = BUFFER_SIZE - remaining_count;
   HAL_SPI_DMAStop(&hspi1);
-
+	__HAL_SPI_CLEAR_OVRFLAG(&hspi1);
+	__HAL_SPI_CLEAR_CRCERRFLAG(&hspi1);
+	HAL_SPI_Init(&hspi1);
+	
   HAL_SPI_RxIntCpltCallback(&hspi1, current_count);
+	
   HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
 
   // printf("%d --> %d", GPIO_Pin, HAL_GPIO_ReadPin(SPI1_SCS_GPIO_Port, SPI1_SCS_Pin));

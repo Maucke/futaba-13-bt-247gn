@@ -38,7 +38,7 @@ void scan_screen()
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay(20000);
+        delay(2000);
     }
 }
 
@@ -53,7 +53,7 @@ void test()
         {
             for (int j = 0; j < 9; j++)
             {
-                internalGram[i][j] = rand();
+                internalGram[i][j] = 0xAA;
             }
         }
     }
