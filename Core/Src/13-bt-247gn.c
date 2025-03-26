@@ -7,10 +7,10 @@ Futaba247Gn device;
 
 uint8_t internalGram[13][9] = {0};
 
-static void delay()
+static void delay(long tick)
 {
 	int i = 0;
-	for (i = 0; i < 25600; i++)
+	for (i = 0; i < tick; i++)
 		;
 }
 
@@ -38,13 +38,12 @@ void scan_screen()
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay();
+        delay(20000);
     }
 }
 
 void test()
 {
-    static uint8_t count = 0;
     static long last_update_time;
     long now_tick = HAL_GetTick();
     if (now_tick - last_update_time > 500)

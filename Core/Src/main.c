@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 #include "13-bt-247gn.h"
 /* USER CODE END Includes */
 
@@ -93,7 +94,7 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
-//  init_screen();
+  //  init_screen();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -103,7 +104,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//		test();
+    //		test();
     scan_screen();
 
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -161,19 +162,23 @@ void SystemClock_Config(void)
 void HAL_SPI_RxIntCpltCallback(SPI_HandleTypeDef *hspi, int count)
 {
   uint8_t i;
+  uint8_t *pGram = (uint8_t *)&internalGram;
   if (hspi->Instance == SPI1)
   {
-    for (i = 0; i < count && i < 9; i++)
+		if(rx_buffer[0] == 0xFF)
+			NVIC_SystemReset();
+    for (i = 0; i < count && (rx_buffer[0] * 9 + i) < (9 * 13); i++)
     {
-      internalGram[rx_buffer[0] % 13][i] = rx_buffer[i + 1];
-      // printf("RAW: %02X, ", rx_buffer[i]);
+      pGram[rx_buffer[0] * 9 + i] = rx_buffer[i + 1];
     }
-//    printf("ADDR: %02X, ", rx_buffer[0] % 13);
-//    for (i = 0; i < 9; i++)
-//    {
-//      printf("%02X ", internalGram[rx_buffer[0] % 13][i]);
-//    }
-  }
+//    for (i = 0; i < 13; i++)
+//		{
+//			for (j = 0; j < 9; j++)
+//				printf("%02X ", internalGram[i][j]);
+//			printf("\n");
+//		}
+  }  
+	memset(rx_buffer, 0, BUFFER_SIZE);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -181,6 +186,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   uint16_t remaining_count = hdma_spi1_rx.Instance->NDTR;
   uint16_t current_count = BUFFER_SIZE - remaining_count;
   HAL_SPI_DMAStop(&hspi1);
+
   HAL_SPI_RxIntCpltCallback(&hspi1, current_count);
   HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
 
