@@ -10,7 +10,7 @@ uint8_t internalGram[13][9] = {0};
 static void delay()
 {
 	int i = 0;
-	for (i = 0; i < 2560; i++)
+	for (i = 0; i < 25600; i++)
 		;
 }
 
@@ -44,18 +44,18 @@ void scan_screen()
 
 void test()
 {
-//    static uint8_t count = 0;
-//    static long last_update_time;
-//    long now_tick = HAL_GetTick();
-//    if (now_tick - last_update_time > 500)
-//    {
-//        last_update_time = HAL_GetTick();
-//        for (int i = 0; i < 13; i++)
-//        {
-//            for (int j = 0; j < 9; j++)
-//            {
-//                internalGram[i][j] = 0x44;
-//            }
-//        }
-//    }
+    static uint8_t count = 0;
+    static long last_update_time;
+    long now_tick = HAL_GetTick();
+    if (now_tick - last_update_time > 500)
+    {
+        last_update_time = HAL_GetTick();
+        for (int i = 0; i < 13; i++)
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                internalGram[i][j] = rand();
+            }
+        }
+    }
 }
