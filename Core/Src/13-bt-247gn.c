@@ -20,7 +20,7 @@ void init_screen()
     {
         for (int j = 0; j < 9; j++)
         {
-            internalGram[i][j] = 0x55;
+            internalGram[i][j] = i+1;
         }
     }
 }
@@ -32,7 +32,7 @@ void scan_screen()
         for (size_t i = 0; i < 8; i++)
             device.segment_part1[i] = internalGram[j][i];
         device.segment_part2 = internalGram[j][8];
-        device.grid_part = 1<<j;
+        device.grid_part = 1 << j;
         device.reverse = 0x0;
         hv57708_dataout(device.rawbytes);
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
@@ -44,20 +44,18 @@ void scan_screen()
 
 void test()
 {
-    Futaba247Gn device;
-    // 初始化 segment_part1 数组
-    for (int i = 0; i < 8; i++) {
-        device.segment_part1[i] = i + 1;
-    }
-    // 初始化位域成员
-    device.grid_part = 0x556; // 13 位最大值
-    device.segment_part2 = 0x67; // 7 位最大值
-    device.reverse = 0; // 4 位最大值
-
-    // 打印 rawbytes 数组的值
-    printf("rawbytes:\n");
-    for (size_t i = 0; i < sizeof(device.rawbytes); i++) {
-        printf("  rawbytes[%zu] = %X\n", i, device.rawbytes[i]);
-    }
-    printf("hv5812: %X\n",*(uint32_t *)(device.rawbytes + 8));
+//    static uint8_t count = 0;
+//    static long last_update_time;
+//    long now_tick = HAL_GetTick();
+//    if (now_tick - last_update_time > 500)
+//    {
+//        last_update_time = HAL_GetTick();
+//        for (int i = 0; i < 13; i++)
+//        {
+//            for (int j = 0; j < 9; j++)
+//            {
+//                internalGram[i][j] = 0x44;
+//            }
+//        }
+//    }
 }

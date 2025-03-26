@@ -94,7 +94,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
   init_screen();
-  test();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,9 +103,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		test();
     scan_screen();
 
-    //    HAL_Delay(100);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
   }
   /* USER CODE END 3 */
@@ -164,16 +163,16 @@ void HAL_SPI_RxIntCpltCallback(SPI_HandleTypeDef *hspi, int count)
   uint8_t i;
   if (hspi->Instance == SPI1)
   {
-    for (i = 0; i < count && i < 9; i++)
-    {
-      internalGram[rx_buffer[0] % 13][i] = rx_buffer[i + 1];
-      // printf("RAW: %02X, ", rx_buffer[i]);
-    }
-    printf("ADDR: %02X, ", rx_buffer[0] % 13);
-    for (i = 0; i < 9; i++)
-    {
-      printf("%02X ", internalGram[rx_buffer[0] % 13][i]);
-    }
+//    for (i = 0; i < count && i < 9; i++)
+//    {
+//      internalGram[rx_buffer[0] % 13][i] = rx_buffer[i + 1];
+//      // printf("RAW: %02X, ", rx_buffer[i]);
+//    }
+//    printf("ADDR: %02X, ", rx_buffer[0] % 13);
+//    for (i = 0; i < 9; i++)
+//    {
+//      printf("%02X ", internalGram[rx_buffer[0] % 13][i]);
+//    }
   }
 }
 
