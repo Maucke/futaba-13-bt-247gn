@@ -4,14 +4,14 @@
 static void delay()
 {
 	int i = 0;
-	for (i = 0; i < 2048; i++)
+	for (i = 0; i < 256; i++)
 		;
 }
 
 // maximum data bit 20
 void hv57708_dataout(unsigned char *data)
 {
-	unsigned char i, j, temp;
+	unsigned char i, j;
 	for (j = 0; j < 8; j++)
 	{
 		for (i = 0; i < 2; i++)

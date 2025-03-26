@@ -93,6 +93,8 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
+  init_screen();
+	test();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -102,9 +104,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    HAL_Delay(100);
+    scan_screen();
+    
+//    HAL_Delay(100);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    test();
   }
   /* USER CODE END 3 */
 }
