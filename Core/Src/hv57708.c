@@ -17,19 +17,19 @@ void hv57708_dataout(unsigned char *data)
 		for (i = 0; i < 2; i++)
 		{
 			HAL_GPIO_WritePin(HV_CLK_GPIO_Port, HV_CLK_Pin, GPIO_PIN_RESET);
-			if (((*data >> ((1 - i) * 4 + 3)) & 0x01))
+			if (((*data >> (i * 4 + 0)) & 0x01))
 				HAL_GPIO_WritePin(HV_DIN1_GPIO_Port, HV_DIN1_Pin, GPIO_PIN_RESET);
 			else
 				HAL_GPIO_WritePin(HV_DIN1_GPIO_Port, HV_DIN1_Pin, GPIO_PIN_SET);
-			if (((*data >> ((1 - i) * 4 + 2)) & 0x01))
+			if (((*data >> (i * 4 + 1)) & 0x01))
 				HAL_GPIO_WritePin(HV_DIN2_GPIO_Port, HV_DIN2_Pin, GPIO_PIN_RESET);
 			else
 				HAL_GPIO_WritePin(HV_DIN2_GPIO_Port, HV_DIN2_Pin, GPIO_PIN_SET);
-			if (((*data >> ((1 - i) * 4 + 1)) & 0x01))
+			if (((*data >> (i * 4 + 2)) & 0x01))
 				HAL_GPIO_WritePin(HV_DIN3_GPIO_Port, HV_DIN3_Pin, GPIO_PIN_RESET);
 			else
 				HAL_GPIO_WritePin(HV_DIN3_GPIO_Port, HV_DIN3_Pin, GPIO_PIN_SET);
-			if (((*data >> ((1 - i) * 4 + 0)) & 0x01))
+			if (((*data >> (i * 4 + 3)) & 0x01))
 				HAL_GPIO_WritePin(HV_DIN4_GPIO_Port, HV_DIN4_Pin, GPIO_PIN_RESET);
 			else
 				HAL_GPIO_WritePin(HV_DIN4_GPIO_Port, HV_DIN4_Pin, GPIO_PIN_SET);

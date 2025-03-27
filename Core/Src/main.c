@@ -58,6 +58,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int testMode = 0;
 #define BUFFER_SIZE 256
 uint8_t rx_buffer[BUFFER_SIZE];
 /* USER CODE END 0 */
@@ -93,8 +94,8 @@ int main(void)
   MX_SPI1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-//  HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
-  //  init_screen();
+  //  HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
+  init_screen();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,9 +105,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // test();
+		if(testMode)
+			test();
     scan_screen();
-
   }
   /* USER CODE END 3 */
 }
@@ -160,28 +161,52 @@ void SystemClock_Config(void)
 
 void HAL_SPI_RxIntCpltCallback(SPI_HandleTypeDef *hspi, int count)
 {
-  uint8_t i,j;
   uint8_t *pGram = (uint8_t *)&internalGram;
   if (hspi->Instance == SPI1)
   {
-//		if(rx_buffer[0] == 0xFF)
-//			NVIC_SystemReset();
-//		printf("%02X ", rx_buffer[0]);
-    for (i = 0; i < count && (rx_buffer[0] * 9 + i) < (9 * 13); i++)
+		testMode=0;
+    //		if(rx_buffer[0] == 0xFF)
+    //			NVIC_SystemReset();
+    //		printf("%02X ", rx_buffer[0]);
+    if (rx_buffer[0] < 0x20) //range:0x00-0x0D
     {
-      pGram[rx_buffer[0] * 9 + i] = rx_buffer[i + 1];
-//			printf("%02X ", rx_buffer[i + 1]);
+      for (size_t i = 0; i < (count - 1) && (rx_buffer[0] * 9 + i) < (9 * 13); i++)
+      {
+        pGram[rx_buffer[0] * 9 + i] = rx_buffer[i + 1];
+        //			printf("%02X ", rx_buffer[i + 1]);
+      }
     }
-//		printf("count: %d\n", count);
+    else if (rx_buffer[0] < 0x40) // bit 4-2:x, bit 0:y range:0x20-0x3F
+    {
+      for (size_t i = 0; i < (count - 1); i++)
+      {
+        ascii_show(((rx_buffer[0] & 0x1E) >> 1) + i, rx_buffer[0] & 1, &rx_buffer[i*5 + 1]);
+      }
+    }
+    else if (rx_buffer[0] < 0x60) // bit 4-2:x, bit 0:y range:0x40-0x5F
+		{
+      for (size_t i = 0; i < (count - 1); i++)
+      {
+        num_show((rx_buffer[0] & 0x1F) + i, &rx_buffer[i + 1]);
+      }
+		}
+    else if (rx_buffer[0] < 0x80) // bit 4-2:x, bit 0:y range:0x60-0x7F
+		{
+      for (size_t i = 0; i < (count - 1); i++)
+      {
+        icon_show((rx_buffer[0] & 0x1F) + i, rx_buffer[i + 1]);
+      }
+		}
+    //		printf("count: %d\n", count);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//    for (i = 0; i < 13; i++)
-//		{
-//			for (j = 0; j < 9; j++)
-//				printf("%02X ", internalGram[i][j]);
-//			printf("\n");
-//		}
-  }  
-	memset(rx_buffer, 0, BUFFER_SIZE);
+    //    for (i = 0; i < 13; i++)
+    //		{
+    //			for (j = 0; j < 9; j++)
+    //				printf("%02X ", internalGram[i][j]);
+    //			printf("\n");
+    //		}
+  }
+  memset(rx_buffer, 0, BUFFER_SIZE);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -189,12 +214,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   uint16_t remaining_count = hdma_spi1_rx.Instance->NDTR;
   uint16_t current_count = BUFFER_SIZE - remaining_count;
   HAL_SPI_DMAStop(&hspi1);
-	__HAL_SPI_CLEAR_OVRFLAG(&hspi1);
-	__HAL_SPI_CLEAR_CRCERRFLAG(&hspi1);
-	HAL_SPI_Init(&hspi1);
-	
+  __HAL_SPI_CLEAR_OVRFLAG(&hspi1);
+  __HAL_SPI_CLEAR_CRCERRFLAG(&hspi1);
+  HAL_SPI_Init(&hspi1);
+
   HAL_SPI_RxIntCpltCallback(&hspi1, current_count);
-	
+
   HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
 
   // printf("%d --> %d", GPIO_Pin, HAL_GPIO_ReadPin(SPI1_SCS_GPIO_Port, SPI1_SCS_Pin));
