@@ -106,7 +106,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if (testMode)
+                    if (testMode)
       test();
     scan_screen();
   }
@@ -168,7 +168,7 @@ void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
     testMode = 0;
     //		if(recv_buff[0] == 0xFF)
     //			NVIC_SystemReset();
-    //		printf("%02X ", recv_buff[0]);
+// 		printf("%02X ", recv_buff[0]);
     if (recv_buff[0] < 0x20) // range:0x00-0x0D
     {
       for (size_t i = 0; i < (count - 1) && (recv_buff[0] * 9 + i) < (9 * 13); i++)
@@ -179,30 +179,46 @@ void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
     }
     else if (recv_buff[0] < 0x40) // bit 4-2:x, bit 0:y range:0x20-0x3F
     {
-      for (size_t i = 0; i < (count - 1); i++)
+      for (size_t i = 0; i < (count - 1); i+=5)
       {
-        ascii_show(((recv_buff[0] & 0x1E) >> 1) + i, recv_buff[0] & 1, &recv_buff[i * 5 + 1]);
+//        printf("ascii_show(%d,%d,%X)", ((recv_buff[0] & 0x1E) >> 1) + i/5, recv_buff[0] & 1, recv_buff[i + 1]);
+        ascii_show(((recv_buff[0] & 0x1E) >> 1) + i/5, recv_buff[0] & 1, recv_buff + i + 1);
       }
     }
     else if (recv_buff[0] < 0x60) // bit 4-2:x, bit 0:y range:0x40-0x5F
     {
       for (size_t i = 0; i < (count - 1); i++)
       {
-        num_show((recv_buff[0] & 0x1F) + i, &recv_buff[i + 1]);
+        num_show((recv_buff[0] & 0x1F) + i, recv_buff[i + 1]);
       }
     }
-    else if (recv_buff[0] < 0x80) // bit 4-2:x, bit 0:y range:0x60-0x7F
+    else if (recv_buff[0] == 0x60) // bit 4-2:x, bit 0:y range:0x60
+    {
+      for (size_t i = 0; i < (count - 2); i++)
+      {
+        icon_show((Icon_e)(recv_buff[1] + i), recv_buff[i + 2]);
+      }
+    }
+    else if (recv_buff[0] < 0xA0) // bit 4-2:x, bit 0:y range:0x80-0x9F
     {
       for (size_t i = 0; i < (count - 1); i++)
       {
-        icon_show((Icon_e)((recv_buff[0] & 0x1F) + i), recv_buff[i + 1]);
+        num_show((recv_buff[0] & 0x1F) + i, num_hex_codes[recv_buff[i + 1] - ' ']);
       }
     }
-    else if (recv_buff[0] < 0x90) // bit 4-2:x, bit 0:y range:0x80-0x8F
+    else if (recv_buff[0] < 0xB0) // bit 4-2:x, bit 0:y range:0xA0-0xAF
     {
-      if (recv_buff[0] == 0x80)
-        setdimming(recv_buff[1]);
+      for (size_t i = 0; i < (count - 1); i++)
+      {
+//        printf("ascii_show(%d,%d,%X)", ((recv_buff[0] & 0x1E) >> 1) + i/5, recv_buff[0] & 1, recv_buff[i + 1]);
+        ascii_show(((recv_buff[0] & 0x1E) >> 1) + i, recv_buff[0] & 1, hex_codes[recv_buff[i + 1] - ' ']);
+      }
     }
+    else if (recv_buff[0] < 0xC0) // bit 4-2:x, bit 0:y range:0xB0-0xBF
+		{
+      if (recv_buff[0] == 0xB0)
+        setdimming(recv_buff[1]);
+		}
     //		printf("count: %d\n", count);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     //    for (i = 0; i < 13; i++)

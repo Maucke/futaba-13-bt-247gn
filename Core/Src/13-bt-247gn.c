@@ -228,38 +228,6 @@ const uint8_t num_positions[7 * 21][3] = {
     {0, 8, 2}, // e
     {0, 8, 5}, // f
     {0, 8, 3}, // g
-    // Bottom Area 2-1
-    {1, 2, 3}, // a
-    {1, 2, 0}, // b
-    {1, 1, 5}, // c
-    {1, 1, 4}, // d
-    {1, 1, 6}, // e
-    {1, 2, 2}, // f
-    {1, 1, 7}, // g
-
-    {1, 1, 3}, // a
-    {1, 1, 1}, // b
-    {1, 0, 6}, // c
-    {1, 0, 5}, // d
-    {1, 0, 7}, // e
-    {1, 1, 2}, // f
-    {1, 1, 0}, // g
-    // Bottom Area 2-0
-    {1, 4, 2}, // a
-    {1, 4, 0}, // b
-    {1, 3, 5}, // c
-    {1, 3, 4}, // d
-    {1, 3, 6}, // e
-    {1, 4, 1}, // f
-    {1, 3, 7}, // g
-
-    {1, 3, 3}, // a
-    {1, 3, 1}, // b
-    {1, 2, 6}, // c
-    {1, 2, 5}, // d
-    {1, 2, 7}, // e
-    {1, 3, 2}, // f
-    {1, 3, 0}, // g
     // Bottom Area 3
     {1, 7, 1}, // a
     {1, 6, 7}, // b
@@ -284,6 +252,38 @@ const uint8_t num_positions[7 * 21][3] = {
     {1, 4, 7}, // e
     {1, 5, 2}, // f
     {1, 5, 0}, // g
+    // Bottom Area 2-0
+    {1, 4, 2}, // a
+    {1, 4, 0}, // b
+    {1, 3, 5}, // c
+    {1, 3, 4}, // d
+    {1, 3, 6}, // e
+    {1, 4, 1}, // f
+    {1, 3, 7}, // g
+
+    {1, 3, 3}, // a
+    {1, 3, 1}, // b
+    {1, 2, 6}, // c
+    {1, 2, 5}, // d
+    {1, 2, 7}, // e
+    {1, 3, 2}, // f
+    {1, 3, 0}, // g
+    // Bottom Area 2-1
+    {1, 2, 3}, // a
+    {1, 2, 0}, // b
+    {1, 1, 5}, // c
+    {1, 1, 4}, // d
+    {1, 1, 6}, // e
+    {1, 2, 2}, // f
+    {1, 1, 7}, // g
+
+    {1, 1, 3}, // a
+    {1, 1, 1}, // b
+    {1, 0, 6}, // c
+    {1, 0, 5}, // d
+    {1, 0, 7}, // e
+    {1, 1, 2}, // f
+    {1, 1, 0}, // g
     // Right Area 3
     {2, 2, 6}, // a
     {2, 3, 0}, // b
@@ -308,6 +308,15 @@ const uint8_t num_positions[7 * 21][3] = {
     {2, 1, 3}, // e
     {2, 1, 0}, // f
     {2, 1, 2}, // g
+    // Right-Bottom Area 2
+
+    {2, 7, 5}, // a
+    {2, 7, 7}, // b
+    {2, 8, 4}, // c
+    {2, 8, 3}, // d
+    {2, 8, 5}, // e
+    {2, 7, 6}, // f
+    {2, 8, 6}, // g
     // Right-Bottom Area 4
     {2, 6, 3}, // a
     {2, 6, 5}, // b
@@ -332,15 +341,6 @@ const uint8_t num_positions[7 * 21][3] = {
     {2, 4, 7}, // e
     {2, 4, 4}, // f
     {2, 4, 6}, // g
-    // Right-Bottom Area 2
-
-    {2, 7, 5}, // a
-    {2, 7, 7}, // b
-    {2, 8, 4}, // c
-    {2, 8, 3}, // d
-    {2, 8, 5}, // e
-    {2, 7, 6}, // f
-    {2, 8, 6}, // g
 };
 
 const uint8_t icon_positions[][3] = {
@@ -429,7 +429,10 @@ void ascii_show(int x, int y, const uint8_t *code) // 5byte
 {
     if (x > 9 || y > 1)
         return;
-
+//		for(int i = 0; i < 5; i++)
+//		{
+//			printf("%x ", code[i]);
+//		}
     if (y == 0)
     {
         int index = 0;
@@ -470,14 +473,14 @@ void ascii_show(int x, int y, const uint8_t *code) // 5byte
     }
 }
 
-void num_show(int ind, const uint8_t *code) // 1byte
+void num_show(int ind, const uint8_t code) // 1byte
 {
     if (ind > 20)
         return;
     for (int j = 0; j < 7; j++)
     {
         uint8_t *pos = (uint8_t *)num_positions[ind * 7 + j];
-        if ((*code >> j) & 1)
+        if ((code >> j) & 1)
             internalGram[pos[0] + 10][pos[1]] |= 1 << pos[2];
         else
             internalGram[pos[0] + 10][pos[1]] &= ~(1 << pos[2]);
