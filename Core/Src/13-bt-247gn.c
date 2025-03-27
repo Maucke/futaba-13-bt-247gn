@@ -101,7 +101,7 @@ const uint8_t hex_codes[CHAR_COUNT][5] = {
     {0x00, 0x00, 0x7F, 0x00, 0x00}, /*"|", 124(ASCII)*/
     {0x00, 0x41, 0x36, 0x08, 0x00}, /*"}", 125(ASCII)*/
     {0x04, 0x08, 0x0C, 0x04, 0x08}, /*"~", 126(ASCII)*/
-    {0x7F, 0x7F, 0x7F, 0x7F, 0x7F}, 
+    {0x7F, 0x7F, 0x7F, 0x7F, 0x7F},
 };
 
 // Hexadecimal code corresponding to each character
@@ -477,10 +477,10 @@ void num_show(int ind, const uint8_t *code) // 1byte
     for (int j = 0; j < 7; j++)
     {
         uint8_t *pos = (uint8_t *)num_positions[ind * 7 + j];
-			if((*code >> j) & 1)
-        internalGram[pos[0] + 10][pos[1]] |= 1 << pos[2];
-			else
-        internalGram[pos[0] + 10][pos[1]] &= ~(1 << pos[2]);
+        if ((*code >> j) & 1)
+            internalGram[pos[0] + 10][pos[1]] |= 1 << pos[2];
+        else
+            internalGram[pos[0] + 10][pos[1]] &= ~(1 << pos[2]);
     }
 }
 
@@ -493,8 +493,14 @@ void icon_show(Icon_e icon, bool en)
         internalGram[pos[0] + 10][pos[1]] &= ~(1 << pos[2]);
 }
 
+int dimming = 100;
 void scan_screen()
 {
+    static int dimmingdamp = 0;
+    if (dimmingdamp < dimming)
+        dimmingdamp++;
+    else if (dimmingdamp > dimming)
+        dimmingdamp--;
     for (size_t j = 0; j < 13; j++)
     {
         for (size_t i = 0; i < 8; i++)
@@ -506,14 +512,22 @@ void scan_screen()
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay(2000);
+        delay(5 + 20 * dimmingdamp);
         memset(device.rawbytes, 0, sizeof device.rawbytes);
         hv57708_dataout(device.rawbytes);
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay(5);
+        delay(2005 - 20 * dimmingdamp);
     }
+}
+
+void setdimming(int val) // 0-100
+{
+    if (val > 100)
+        dimming = 100;
+    else
+        dimming = val;
 }
 
 void test()

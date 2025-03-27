@@ -105,8 +105,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if(testMode)
-			test();
+    if (testMode)
+      test();
     scan_screen();
   }
   /* USER CODE END 3 */
@@ -164,11 +164,11 @@ void HAL_SPI_RxIntCpltCallback(SPI_HandleTypeDef *hspi, int count)
   uint8_t *pGram = (uint8_t *)&internalGram;
   if (hspi->Instance == SPI1)
   {
-		testMode=0;
+    testMode = 0;
     //		if(rx_buffer[0] == 0xFF)
     //			NVIC_SystemReset();
     //		printf("%02X ", rx_buffer[0]);
-    if (rx_buffer[0] < 0x20) //range:0x00-0x0D
+    if (rx_buffer[0] < 0x20) // range:0x00-0x0D
     {
       for (size_t i = 0; i < (count - 1) && (rx_buffer[0] * 9 + i) < (9 * 13); i++)
       {
@@ -180,23 +180,28 @@ void HAL_SPI_RxIntCpltCallback(SPI_HandleTypeDef *hspi, int count)
     {
       for (size_t i = 0; i < (count - 1); i++)
       {
-        ascii_show(((rx_buffer[0] & 0x1E) >> 1) + i, rx_buffer[0] & 1, &rx_buffer[i*5 + 1]);
+        ascii_show(((rx_buffer[0] & 0x1E) >> 1) + i, rx_buffer[0] & 1, &rx_buffer[i * 5 + 1]);
       }
     }
     else if (rx_buffer[0] < 0x60) // bit 4-2:x, bit 0:y range:0x40-0x5F
-		{
+    {
       for (size_t i = 0; i < (count - 1); i++)
       {
         num_show((rx_buffer[0] & 0x1F) + i, &rx_buffer[i + 1]);
       }
-		}
+    }
     else if (rx_buffer[0] < 0x80) // bit 4-2:x, bit 0:y range:0x60-0x7F
-		{
+    {
       for (size_t i = 0; i < (count - 1); i++)
       {
         icon_show((rx_buffer[0] & 0x1F) + i, rx_buffer[i + 1]);
       }
-		}
+    }
+    else if (rx_buffer[0] < 0x90) // bit 4-2:x, bit 0:y range:0x80-0x8F
+    {
+      if (rx_buffer[0] == 0x80)
+        setdimming(rx_buffer[1]);
+    }
     //		printf("count: %d\n", count);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     //    for (i = 0; i < 13; i++)

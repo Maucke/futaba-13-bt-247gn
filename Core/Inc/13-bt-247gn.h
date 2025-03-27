@@ -101,6 +101,7 @@ typedef union
 void ascii_show(int x, int y, const uint8_t *code);
 void num_show(int ind, const uint8_t *code);
 void icon_show(Icon_e icon, bool en);
+void setdimming(int val) ;
 void init_screen(void);
 void scan_screen(void);
 void test(void);
