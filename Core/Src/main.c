@@ -64,9 +64,9 @@ uint8_t rx_buffer[BUFFER_SIZE];
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -90,11 +90,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_SPI1_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   //  HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rx_buffer, BUFFER_SIZE);
   init_screen();
   /* USER CODE END 2 */
 
@@ -113,22 +114,22 @@ int main(void)
 }
 
 /**
- * @brief System Clock Configuration
- * @retval None
- */
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-   */
+  */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
 
   /** Initializes the RCC Oscillators according to the specified parameters
-   * in the RCC_OscInitTypeDef structure.
-   */
+  * in the RCC_OscInitTypeDef structure.
+  */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -144,8 +145,9 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -159,48 +161,47 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_SPI_RxIntCpltCallback(SPI_HandleTypeDef *hspi, int count)
+void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
 {
   uint8_t *pGram = (uint8_t *)&internalGram;
-  if (hspi->Instance == SPI1)
   {
     testMode = 0;
-    //		if(rx_buffer[0] == 0xFF)
+    //		if(recv_buff[0] == 0xFF)
     //			NVIC_SystemReset();
-    //		printf("%02X ", rx_buffer[0]);
-    if (rx_buffer[0] < 0x20) // range:0x00-0x0D
+    //		printf("%02X ", recv_buff[0]);
+    if (recv_buff[0] < 0x20) // range:0x00-0x0D
     {
-      for (size_t i = 0; i < (count - 1) && (rx_buffer[0] * 9 + i) < (9 * 13); i++)
+      for (size_t i = 0; i < (count - 1) && (recv_buff[0] * 9 + i) < (9 * 13); i++)
       {
-        pGram[rx_buffer[0] * 9 + i] = rx_buffer[i + 1];
-        //			printf("%02X ", rx_buffer[i + 1]);
+        pGram[recv_buff[0] * 9 + i] = recv_buff[i + 1];
+        //			printf("%02X ", recv_buff[i + 1]);
       }
     }
-    else if (rx_buffer[0] < 0x40) // bit 4-2:x, bit 0:y range:0x20-0x3F
+    else if (recv_buff[0] < 0x40) // bit 4-2:x, bit 0:y range:0x20-0x3F
     {
       for (size_t i = 0; i < (count - 1); i++)
       {
-        ascii_show(((rx_buffer[0] & 0x1E) >> 1) + i, rx_buffer[0] & 1, &rx_buffer[i * 5 + 1]);
+        ascii_show(((recv_buff[0] & 0x1E) >> 1) + i, recv_buff[0] & 1, &recv_buff[i * 5 + 1]);
       }
     }
-    else if (rx_buffer[0] < 0x60) // bit 4-2:x, bit 0:y range:0x40-0x5F
+    else if (recv_buff[0] < 0x60) // bit 4-2:x, bit 0:y range:0x40-0x5F
     {
       for (size_t i = 0; i < (count - 1); i++)
       {
-        num_show((rx_buffer[0] & 0x1F) + i, &rx_buffer[i + 1]);
+        num_show((recv_buff[0] & 0x1F) + i, &recv_buff[i + 1]);
       }
     }
-    else if (rx_buffer[0] < 0x80) // bit 4-2:x, bit 0:y range:0x60-0x7F
+    else if (recv_buff[0] < 0x80) // bit 4-2:x, bit 0:y range:0x60-0x7F
     {
       for (size_t i = 0; i < (count - 1); i++)
       {
-        icon_show((rx_buffer[0] & 0x1F) + i, rx_buffer[i + 1]);
+        icon_show((Icon_e)((recv_buff[0] & 0x1F) + i), recv_buff[i + 1]);
       }
     }
-    else if (rx_buffer[0] < 0x90) // bit 4-2:x, bit 0:y range:0x80-0x8F
+    else if (recv_buff[0] < 0x90) // bit 4-2:x, bit 0:y range:0x80-0x8F
     {
-      if (rx_buffer[0] == 0x80)
-        setdimming(rx_buffer[1]);
+      if (recv_buff[0] == 0x80)
+        setdimming(recv_buff[1]);
     }
     //		printf("count: %d\n", count);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -211,7 +212,16 @@ void HAL_SPI_RxIntCpltCallback(SPI_HandleTypeDef *hspi, int count)
     //			printf("\n");
     //		}
   }
-  memset(rx_buffer, 0, BUFFER_SIZE);
+  memset(recv_buff, 0, BUFFER_SIZE);
+}
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size)
+{
+  if(&huart1 == huart)
+  {
+    Data_RxIntCpltCallback(rx_buffer, Size);
+		HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rx_buffer, BUFFER_SIZE);
+  }
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -223,7 +233,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   __HAL_SPI_CLEAR_CRCERRFLAG(&hspi1);
   HAL_SPI_Init(&hspi1);
 
-  HAL_SPI_RxIntCpltCallback(&hspi1, current_count);
+  Data_RxIntCpltCallback(rx_buffer, current_count);
 
   HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
 
@@ -233,9 +243,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 /* USER CODE END 4 */
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -247,14 +257,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
