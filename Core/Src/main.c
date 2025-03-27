@@ -60,7 +60,8 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 int testMode = 0;
 #define BUFFER_SIZE 256
-uint8_t rx_buffer[BUFFER_SIZE];
+uint8_t uart_rx_buffer[BUFFER_SIZE];
+uint8_t spi_rx_buffer[BUFFER_SIZE];
 /* USER CODE END 0 */
 
 /**
@@ -90,12 +91,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_SPI1_Init();
   MX_DMA_Init();
+  MX_SPI1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  //  HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rx_buffer, BUFFER_SIZE);
+  // HAL_SPI_Receive_DMA(&hspi1, spi_rx_buffer, BUFFER_SIZE);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uart_rx_buffer, BUFFER_SIZE);
   init_screen();
   /* USER CODE END 2 */
 
@@ -168,7 +169,7 @@ void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
     testMode = 0;
     //		if(recv_buff[0] == 0xFF)
     //			NVIC_SystemReset();
-// 		printf("%02X ", recv_buff[0]);
+//				printf("%02X %d\r\n", recv_buff[0], count);
     if (recv_buff[0] < 0x20) // range:0x00-0x0D
     {
       for (size_t i = 0; i < (count - 1) && (recv_buff[0] * 9 + i) < (9 * 13); i++)
@@ -235,8 +236,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size)
 {
   if(&huart1 == huart)
   {
-    Data_RxIntCpltCallback(rx_buffer, Size);
-		HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rx_buffer, BUFFER_SIZE);
+    Data_RxIntCpltCallback(uart_rx_buffer, Size);
+		HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uart_rx_buffer, BUFFER_SIZE);
   }
 }
 
@@ -249,9 +250,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   __HAL_SPI_CLEAR_CRCERRFLAG(&hspi1);
   HAL_SPI_Init(&hspi1);
 
-  Data_RxIntCpltCallback(rx_buffer, current_count);
+  Data_RxIntCpltCallback(spi_rx_buffer, current_count);
 
-  HAL_SPI_Receive_DMA(&hspi1, rx_buffer, BUFFER_SIZE);
+  HAL_SPI_Receive_DMA(&hspi1, spi_rx_buffer, BUFFER_SIZE);
 
   // printf("%d --> %d", GPIO_Pin, HAL_GPIO_ReadPin(SPI1_SCS_GPIO_Port, SPI1_SCS_Pin));
 }

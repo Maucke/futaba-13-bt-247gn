@@ -515,13 +515,13 @@ void scan_screen()
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay(5 + 20 * dimmingdamp);
+        delay(5 + 200 * dimmingdamp);
         memset(device.rawbytes, 0, sizeof device.rawbytes);
         hv57708_dataout(device.rawbytes);
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay(2005 - 20 * dimmingdamp);
+        delay(20005 - 200 * dimmingdamp);
     }
 }
 
