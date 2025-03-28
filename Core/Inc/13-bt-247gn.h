@@ -45,6 +45,7 @@ typedef enum
     S,
     Colon,
     M,
+    Bar_10,
     Bar_9,
     Bar_8,
     Bar_7,
