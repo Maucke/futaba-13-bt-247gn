@@ -160,6 +160,9 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+extern uint8_t pixel_gram[];
+extern uint8_t num_gram[];
+extern uint8_t icon_gram[];
 
 void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
 {
@@ -171,52 +174,39 @@ void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
     //				printf("%02X %d\r\n", recv_buff[0], count);
     if (recv_buff[0] < 0x20) // range:0x00-0x0D
     {
-      for (size_t i = 0; i < (count - 1) && (recv_buff[0] * 9 + i) < (9 * 13); i++)
-      {
-        pGram[recv_buff[0] * 9 + i] = recv_buff[i + 1];
-        //			printf("%02X ", recv_buff[i + 1]);
-      }
+//      for (size_t i = 0; i < (count - 1) && (recv_buff[0] * 9 + i) < (9 * 13); i++)
+//      {
+//        pGram[recv_buff[0] * 9 + i] = recv_buff[i + 1];
+//        //			printf("%02X ", recv_buff[i + 1]);
+//      }
     }
     else if (recv_buff[0] < 0x40) // bit 4-2:x, bit 0:y range:0x20-0x3F
     {
-      for (size_t i = 0; i < (count - 1); i += 5)
-      {
-        int x = ((recv_buff[0] & 0x1E) >> 1) + i / 5;
-        int y = recv_buff[0] & 1;
-
-        //        printf("ascii_show(%d,%d,%X)", ((recv_buff[0] & 0x1E) >> 1) + i/5, recv_buff[0] & 1, recv_buff[i + 1]);
-        ascii_show(x % 10, (y + x / 10) % 2, recv_buff + i + 1);
-      }
+      memcpy(pixel_gram + ((recv_buff[0] & 0x1E) >> 1) * 5 + (recv_buff[0] & 1) * 10 * 5, recv_buff + 1, (count - 1));
     }
     else if (recv_buff[0] < 0x60) // bit 4-2:x, bit 0:y range:0x40-0x5F
     {
-      for (size_t i = 0; i < (count - 1); i++)
-      {
-        num_show((recv_buff[0] & 0x1F) + i, recv_buff[i + 1]);
-      }
+      memcpy(num_gram + (recv_buff[0] & 0x1F), recv_buff + 1, (count - 1));
     }
     else if (recv_buff[0] == 0x60) // bit 4-2:x, bit 0:y range:0x60
     {
-      for (size_t i = 0; i < (count - 2); i++)
-      {
-        icon_show((Icon_e)(recv_buff[1] + i), recv_buff[i + 2]);
-      }
+      memcpy(icon_gram + recv_buff[1], recv_buff + 2, (count - 2));
     }
     else if (recv_buff[0] < 0xA0) // bit 4-2:x, bit 0:y range:0x80-0x9F
     {
-      for (size_t i = 0; i < (count - 1); i++)
-      {
-        num_show((recv_buff[0] & 0x1F) + i, num_hex_codes[recv_buff[i + 1] - ' ']);
-      }
+//      for (size_t i = 0; i < (count - 1); i++)
+//      {
+//        num_show((recv_buff[0] & 0x1F) + i, num_hex_codes[recv_buff[i + 1] - ' ']);
+//      }
     }
     else if (recv_buff[0] < 0xB0) // bit 4-2:x, bit 0:y range:0xA0-0xAF
     {
-      for (size_t i = 0; i < (count - 1); i++)
-      {
-        int x = ((recv_buff[0] & 0x1E) >> 1) + i;
-        int y = recv_buff[0] & 1;
-        ascii_show(x % 10, (y + x / 10) % 2, hex_codes[recv_buff[i + 1] - ' ']);
-      }
+//      for (size_t i = 0; i < (count - 1); i++)
+//      {
+//        int x = ((recv_buff[0] & 0x1E) >> 1) + i;
+//        int y = recv_buff[0] & 1;
+//        ascii_show(x % 10, (y + x / 10) % 2, hex_codes[recv_buff[i + 1] - ' ']);
+//      }
     }
     else if (recv_buff[0] < 0xC0) // bit 4-2:x, bit 0:y range:0xB0-0xBF
     {

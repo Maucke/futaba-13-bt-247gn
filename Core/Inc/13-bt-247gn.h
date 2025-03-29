@@ -25,6 +25,9 @@
 // 8,4	8,3	8,2	8,1	8,0
 extern uint8_t internalGram[][9];
 
+#define PIXEL_COUNT (20)
+#define NUM_COUNT (21)
+#define ICON_COUNT (49)
 typedef enum
 {
     Play,

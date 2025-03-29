@@ -169,15 +169,7 @@ const uint8_t num_hex_codes[CHAR_COUNT] = {
 };
 
 const uint8_t pixel_positions[70][2] = {
-    {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, 
-{1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, 
-{2, 0}, 				{2, 2}, {2, 3}, {2, 4}, {2, 5}, {2, 6}, {2, 7}, 
-{3, 0}, {3, 1}, {3, 2}, {3, 3}, {3, 4}, {3, 5}, {3, 6}, {3, 7}, 
-{4, 0}, {4, 1}, {4, 2}, {4, 3}, {4, 4}, {4, 5}, {4, 6}, {4, 7}, 
-{5, 0}, {5, 1}, {5, 2}, {5, 3}, {5, 4}, {5, 5}, {5, 6}, {5, 7}, 
-{6, 0}, {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {6, 6}, {6, 7}, 
-{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, 
-{8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1}, {8, 0}};
+    {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, {2, 0}, {2, 2}, {2, 3}, {2, 4}, {2, 5}, {2, 6}, {2, 7}, {3, 0}, {3, 1}, {3, 2}, {3, 3}, {3, 4}, {3, 5}, {3, 6}, {3, 7}, {4, 0}, {4, 1}, {4, 2}, {4, 3}, {4, 4}, {4, 5}, {4, 6}, {4, 7}, {5, 0}, {5, 1}, {5, 2}, {5, 3}, {5, 4}, {5, 5}, {5, 6}, {5, 7}, {6, 0}, {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {6, 6}, {6, 7}, {7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1}, {8, 0}};
 
 const uint8_t num_positions[7 * 21][3] = {
     // Left Area 3
@@ -422,8 +414,8 @@ static void delay(long tick)
 // 12-Grid: rightArea
 void init_screen()
 {
-	 for(int i = 0; i < 13; i++)
-			internalGram[i][2] = 0;
+    for (int i = 0; i < 13; i++)
+        internalGram[i][2] = 0;
 }
 
 //  0-9-Grid: PixelArea
@@ -431,10 +423,10 @@ void ascii_show(int x, int y, const uint8_t *code) // 5byte
 {
     if (x > 9 || y > 1)
         return;
-//		for(int i = 0; i < 5; i++)
-//		{
-//			printf("%x ", code[i]);
-//		}
+    //		for(int i = 0; i < 5; i++)
+    //		{
+    //			printf("%x ", code[i]);
+    //		}
     if (y == 0)
     {
         int index = 0;
@@ -499,6 +491,9 @@ void icon_show(Icon_e icon, bool en)
 }
 
 int dimming = 100;
+uint8_t pixel_gram[5 * PIXEL_COUNT] = {0};
+uint8_t num_gram[NUM_COUNT] = {0};
+uint8_t icon_gram[ICON_COUNT] = {0};
 void scan_screen()
 {
     static int dimmingdamp = 0;
@@ -506,8 +501,21 @@ void scan_screen()
         dimmingdamp++;
     else if (dimmingdamp > dimming)
         dimmingdamp--;
+
+    for (size_t i = 0; i < NUM_COUNT; i++)
+        num_show(i, num_gram[i]);
+    for (size_t i = 0; i < PIXEL_COUNT; i++)
+    {
+        ascii_show(i, (i / 10) % 2, pixel_gram + 5 * i);
+    }
+    for (size_t i = 0; i < ICON_COUNT; i++)
+    {
+        icon_show((Icon_e)i, icon_gram[i]);
+    }
+
     for (size_t j = 0; j < 13; j++)
     {
+
         for (size_t i = 0; i < 8; i++)
             device.segment_part1[i] = internalGram[j][i];
         device.segment_part2 = internalGram[j][8];
@@ -517,14 +525,14 @@ void scan_screen()
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay(5 + 200 * dimmingdamp);
+        delay(2 + 200 * dimmingdamp);
         memset(device.rawbytes, 0, sizeof device.rawbytes);
-				device.segment_part1[2] = 0;
+        device.segment_part1[2] = 0;
         hv57708_dataout(device.rawbytes);
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay(20005 - 200 * dimmingdamp);
+        delay(20002 - 200 * dimmingdamp);
     }
 }
 
