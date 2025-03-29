@@ -20,15 +20,12 @@ void hv5812_dataout(uint32_t *data)
 		else
 			HAL_GPIO_WritePin(HV2_DIN_GPIO_Port, HV2_DIN_Pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(HV2_CLK_GPIO_Port, HV2_CLK_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(HV2_DIN_GPIO_Port, HV2_DIN_Pin, GPIO_PIN_RESET);
 	}
 }
 
 void hv5812_updata()
 {
 	HAL_GPIO_WritePin(HV2_LOAD_GPIO_Port, HV2_LOAD_Pin, GPIO_PIN_RESET);
-	delay();
 	HAL_GPIO_WritePin(HV2_LOAD_GPIO_Port, HV2_LOAD_Pin, GPIO_PIN_SET);
-	delay();
 	HAL_GPIO_WritePin(HV2_LOAD_GPIO_Port, HV2_LOAD_Pin, GPIO_PIN_RESET);
 }
