@@ -174,11 +174,11 @@ void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
     //				printf("%02X %d\r\n", recv_buff[0], count);
     if (recv_buff[0] < 0x20) // range:0x00-0x0D
     {
-//      for (size_t i = 0; i < (count - 1) && (recv_buff[0] * 9 + i) < (9 * 13); i++)
-//      {
-//        pGram[recv_buff[0] * 9 + i] = recv_buff[i + 1];
-//        //			printf("%02X ", recv_buff[i + 1]);
-//      }
+      //      for (size_t i = 0; i < (count - 1) && (recv_buff[0] * 9 + i) < (9 * 13); i++)
+      //      {
+      //        pGram[recv_buff[0] * 9 + i] = recv_buff[i + 1];
+      //        //			printf("%02X ", recv_buff[i + 1]);
+      //      }
     }
     else if (recv_buff[0] < 0x40) // bit 4-2:x, bit 0:y range:0x20-0x3F
     {
@@ -194,19 +194,22 @@ void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
     }
     else if (recv_buff[0] < 0xA0) // bit 4-2:x, bit 0:y range:0x80-0x9F
     {
-//      for (size_t i = 0; i < (count - 1); i++)
-//      {
-//        num_show((recv_buff[0] & 0x1F) + i, num_hex_codes[recv_buff[i + 1] - ' ']);
-//      }
+      for (size_t i = 0; i < (count - 1); i++)
+      {
+        num_gram[(recv_buff[0] & 0x1F) + i] = num_hex_codes[recv_buff[i + 1] - ' '];
+      }
     }
     else if (recv_buff[0] < 0xB0) // bit 4-2:x, bit 0:y range:0xA0-0xAF
     {
-//      for (size_t i = 0; i < (count - 1); i++)
-//      {
-//        int x = ((recv_buff[0] & 0x1E) >> 1) + i;
-//        int y = recv_buff[0] & 1;
-//        ascii_show(x % 10, (y + x / 10) % 2, hex_codes[recv_buff[i + 1] - ' ']);
-//      }
+      for (size_t i = 0; i < (count - 1); i++)
+      {
+        int x = ((recv_buff[0] & 0x1E) >> 1) + i;
+        int y = recv_buff[0] & 1;
+        for (size_t j = 0; j < 5; j++)
+        {
+          pixel_gram[((recv_buff[0] & 0x1E) >> 1) * 5 + (recv_buff[0] & 1) * 10 * 5 + j] = hex_codes[recv_buff[i + 1] - ' '][j];
+        }
+      }
     }
     else if (recv_buff[0] < 0xC0) // bit 4-2:x, bit 0:y range:0xB0-0xBF
     {
@@ -239,8 +242,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   uint16_t remaining_count = hdma_spi1_rx.Instance->NDTR;
   uint16_t current_count = BUFFER_SIZE - remaining_count;
   HAL_SPI_DMAStop(&hspi1);
-  __HAL_SPI_CLEAR_OVRFLAG(&hspi1);
-  __HAL_SPI_CLEAR_CRCERRFLAG(&hspi1);
+  __HAL_RCC_SPI1_FORCE_RESET();
+  __HAL_RCC_SPI1_RELEASE_RESET();
   HAL_SPI_Init(&hspi1);
 
   Data_RxIntCpltCallback(spi_rx_buffer, current_count);
