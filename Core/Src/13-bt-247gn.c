@@ -503,17 +503,6 @@ void scan_screen()
     else if (dimmingdamp > dimming)
         dimmingdamp--;
 
-    for (size_t i = 0; i < NUM_COUNT; i++)
-        num_show(i, num_gram[i]);
-    for (size_t i = 0; i < PIXEL_COUNT; i++)
-    {
-        ascii_show(i % 10, (i / 10) % 2, pixel_gram + 5 * i);
-    }
-    for (size_t i = 0; i < ICON_COUNT; i++)
-    {
-        icon_show((Icon_e)i, icon_gram[i]);
-    }
-
     if (dimmingdamp > 0)
     {
         screenoff = false;
@@ -549,6 +538,17 @@ void scan_screen()
         hv5812_updata();
         hv57708_updata();
         screenoff = true;
+    }
+
+    for (size_t i = 0; i < NUM_COUNT; i++)
+        num_show(i, num_gram[i]);
+    for (size_t i = 0; i < PIXEL_COUNT; i++)
+    {
+        ascii_show(i % 10, (i / 10) % 2, pixel_gram + 5 * i);
+    }
+    for (size_t i = 0; i < ICON_COUNT; i++)
+    {
+        icon_show((Icon_e)i, icon_gram[i]);
     }
 }
 
