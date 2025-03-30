@@ -496,6 +496,7 @@ uint8_t num_gram[NUM_COUNT] = {0};
 uint8_t icon_gram[ICON_COUNT] = {0};
 void scan_screen()
 {
+    static bool screenoff = false;
     static int dimmingdamp = 0;
     if (dimmingdamp < dimming)
         dimmingdamp++;
@@ -513,26 +514,41 @@ void scan_screen()
         icon_show((Icon_e)i, icon_gram[i]);
     }
 
-    for (size_t j = 0; j < 13; j++)
+    if (dimmingdamp > 0)
     {
-
-        for (size_t i = 0; i < 8; i++)
-            device.segment_part1[i] = internalGram[j][i];
-        device.segment_part2 = internalGram[j][8];
-        device.grid_part = 1 << j;
-        device.reverse = 0x0;
-        hv57708_dataout(device.rawbytes);
-        hv5812_dataout((uint32_t *)(device.rawbytes + 8));
-        hv5812_updata();
-        hv57708_updata();
-        delay(2 + 200 * dimmingdamp);
+        screenoff = false;
+        for (size_t j = 0; j < 13; j++)
+        {
+            for (size_t i = 0; i < 8; i++)
+                device.segment_part1[i] = internalGram[j][i];
+            device.segment_part2 = internalGram[j][8];
+            device.grid_part = 1 << j;
+            device.reverse = 0x0;
+            hv57708_dataout(device.rawbytes);
+            hv5812_dataout((uint32_t *)(device.rawbytes + 8));
+            hv5812_updata();
+            hv57708_updata();
+            delay(100 * dimmingdamp);
+            memset(device.rawbytes, 0, sizeof device.rawbytes);
+            device.segment_part1[2] = 0;
+            hv57708_dataout(device.rawbytes);
+            hv5812_dataout((uint32_t *)(device.rawbytes + 8));
+            hv5812_updata();
+            hv57708_updata();
+            delay(10000 - 100 * dimmingdamp);
+        }
+    }
+    else
+    {
+        if (screenoff)
+            return;
         memset(device.rawbytes, 0, sizeof device.rawbytes);
         device.segment_part1[2] = 0;
         hv57708_dataout(device.rawbytes);
         hv5812_dataout((uint32_t *)(device.rawbytes + 8));
         hv5812_updata();
         hv57708_updata();
-        delay(20002 - 200 * dimmingdamp);
+        screenoff = true;
     }
 }
 
