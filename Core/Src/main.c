@@ -182,32 +182,35 @@ void Data_RxIntCpltCallback(uint8_t *recv_buff, int count)
     }
     else if (recv_buff[0] < 0x40) // bit 4-2:x, bit 0:y range:0x20-0x3F
     {
-      memcpy(pixel_gram + ((recv_buff[0] & 0x1E) >> 1) * 5 + (recv_buff[0] & 1) * 10 * 5, recv_buff + 1, (count - 1));
+      int x = ((recv_buff[0] & 0x1E) >> 1);
+      int y = recv_buff[0] & 1;
+      memcpy(pixel_gram + x * 5 + y * 10 * 5, recv_buff + 1, (count - 1) > (PIXEL_COUNT * 5) ? (PIXEL_COUNT * 5) : (count - 1));
     }
     else if (recv_buff[0] < 0x60) // bit 4-2:x, bit 0:y range:0x40-0x5F
     {
-      memcpy(num_gram + (recv_buff[0] & 0x1F), recv_buff + 1, (count - 1));
+      memcpy(num_gram + (recv_buff[0] & 0x1F), recv_buff + 1, (count - 1) > NUM_COUNT ? NUM_COUNT : (count - 1));
     }
     else if (recv_buff[0] == 0x60) // bit 4-2:x, bit 0:y range:0x60
     {
-      memcpy(icon_gram + recv_buff[1], recv_buff + 2, (count - 2));
+      memcpy(icon_gram + recv_buff[1], recv_buff + 2, (count - 2) > ICON_COUNT ? ICON_COUNT : (count - 2));
     }
     else if (recv_buff[0] < 0xA0) // bit 4-2:x, bit 0:y range:0x80-0x9F
     {
-      for (size_t i = 0; i < (count - 1); i++)
+      int x = (recv_buff[0] & 0x1F);
+      for (size_t i = 0; i < (count - 1) && (x + i < NUM_COUNT); i++)
       {
-        num_gram[(recv_buff[0] & 0x1F) + i] = num_hex_codes[recv_buff[i + 1] - ' '];
+        num_gram[x + i] = num_hex_codes[recv_buff[i + 1] - ' '];
       }
     }
     else if (recv_buff[0] < 0xB0) // bit 4-2:x, bit 0:y range:0xA0-0xAF
     {
-      for (size_t i = 0; i < (count - 1); i++)
+      int x = ((recv_buff[0] & 0x1E) >> 1);
+      int y = recv_buff[0] & 1;
+      for (size_t i = 0; i < (count - 1) && (i + x + 10 * y < PIXEL_COUNT); i++)
       {
-        int x = ((recv_buff[0] & 0x1E) >> 1) + i;
-        int y = recv_buff[0] & 1;
         for (size_t j = 0; j < 5; j++)
         {
-          pixel_gram[((recv_buff[0] & 0x1E) >> 1) * 5 + (recv_buff[0] & 1) * 10 * 5 + j] = hex_codes[recv_buff[i + 1] - ' '][j];
+          pixel_gram[x * 5 + y * 10 * 5 + i * 5 + j] = hex_codes[recv_buff[i + 1] - ' '][j];
         }
       }
     }

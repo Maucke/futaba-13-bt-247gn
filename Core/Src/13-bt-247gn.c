@@ -506,7 +506,7 @@ void scan_screen()
         num_show(i, num_gram[i]);
     for (size_t i = 0; i < PIXEL_COUNT; i++)
     {
-        ascii_show(i, (i / 10) % 2, pixel_gram + 5 * i);
+        ascii_show(i % 10, (i / 10) % 2, pixel_gram + 5 * i);
     }
     for (size_t i = 0; i < ICON_COUNT; i++)
     {
