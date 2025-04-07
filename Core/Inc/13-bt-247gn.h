@@ -27,7 +27,7 @@ extern uint8_t internalGram[][9];
 
 #define PIXEL_COUNT (20)
 #define NUM_COUNT (21)
-#define ICON_COUNT (50)
+#define ICON_COUNT (51)
 typedef enum
 {
     Play,
@@ -75,6 +75,7 @@ typedef enum
     Sd,
     Cd,
     Lock,
+    TempO,
     Key,
 
     L1,
